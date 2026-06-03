@@ -39,10 +39,10 @@ function App() {
         />
         
         {/* Default Route */}
-        <Route path="/" element={<Navigate to="/marketplace" replace />} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
         
         {/* Catch all */}
-        <Route path="*" element={<Navigate to="/marketplace" replace />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </Router>
   );
