@@ -1,34 +1,41 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const AdminDashboard = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [adminPassword, setAdminPassword] = useState('');
-  const [passwordInput, setPasswordInput] = useState('');
   const [submissions, setSubmissions] = useState([]);
   const [filter, setFilter] = useState('all');
   const [selectedId, setSelectedId] = useState(null);
   const [reward, setReward] = useState('');
-
-  // Load admin password from backend on mount
-  useEffect(() => {
-    const checkAuth = async () => {
-      const stored = sessionStorage.getItem('adminAuth');
-      if (stored) {
-        setIsAuthenticated(true);
-      }
-    };
-    checkAuth();
-  }, []);
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (isAuthenticated) {
-      loadData();
+    const userStr = localStorage.getItem('user');
+    const token = localStorage.getItem('token');
+
+    if (!userStr || !token) {
+      navigate('/login');
+      return;
     }
-  }, [isAuthenticated]);
 
-  const loadData = async () => {
     try {
-      const res = await fetch('https://influencer-gig-api-production.up.railway.app/api/submissions');
+      const userData = JSON.parse(userStr);
+      if (!userData.isAdmin) {
+        navigate('/dashboard');
+        return;
+      }
+      setUser(userData);
+      loadData(token);
+    } catch (e) {
+      navigate('/login');
+    }
+  }, [navigate]);
+
+  const loadData = async (token) => {
+    try {
+      const res = await fetch('https://influencer-gig-api-production.up.railway.app/api/submissions', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       const data = await res.json();
       setSubmissions(data || []);
     } catch (err) {
@@ -36,40 +43,29 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    // Use a simple hardcoded password for now - CHANGE THIS
-    const ADMIN_PASSWORD = 'influencer2025'; // CHANGE THIS TO YOUR PASSWORD
-    
-    if (passwordInput === ADMIN_PASSWORD) {
-      sessionStorage.setItem('adminAuth', 'true');
-      setIsAuthenticated(true);
-      setPasswordInput('');
-      alert('✅ Welcome, Admin!');
-    } else {
-      alert('❌ Incorrect password');
-      setPasswordInput('');
-    }
-  };
-
   const handleLogout = () => {
-    sessionStorage.removeItem('adminAuth');
-    setIsAuthenticated(false);
-    setPasswordInput('');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login');
   };
 
   const handleApprove = async () => {
     if (!selectedId || !reward) return alert('Enter reward amount');
+    const token = localStorage.getItem('token');
     try {
       await fetch('https://influencer-gig-api-production.up.railway.app/api/admin/approve-submission', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ submissionId: selectedId, rewardAmount: parseFloat(reward) })
       });
       alert('Approved!');
       setSelectedId(null);
       setReward('');
-      loadData();
+      const t = localStorage.getItem('token');
+      loadData(t);
     } catch (err) {
       alert('Error: ' + err.message);
     }
@@ -77,15 +73,20 @@ const AdminDashboard = () => {
 
   const handleReject = async () => {
     if (!selectedId) return;
+    const token = localStorage.getItem('token');
     try {
       await fetch(`https://influencer-gig-api-production.up.railway.app/api/submissions/${selectedId}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ Status: 'Rejected' })
       });
       alert('Rejected!');
       setSelectedId(null);
-      loadData();
+      const t = localStorage.getItem('token');
+      loadData(t);
     } catch (err) {
       alert('Error: ' + err.message);
     }
@@ -100,56 +101,23 @@ const AdminDashboard = () => {
 
   const selected = submissions.find(s => s.id === selectedId);
 
-  // LOGIN SCREEN
-  if (!isAuthenticated) {
-    return (
-      <div style={{ background: '#0f172a', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', fontFamily: 'system-ui' }}>
-        <div style={{ background: '#1e293b', borderRadius: '8px', padding: '40px', maxWidth: '400px', width: '100%', border: '1px solid #475569' }}>
-          <h1 style={{ color: '#fff', marginBottom: '10px' }}>🔐 Admin Access</h1>
-          <p style={{ color: '#cbd5e1', marginBottom: '30px' }}>Influencers cannot access this area</p>
-          
-          <form onSubmit={handleLogin}>
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', color: '#cbd5e1', fontSize: '14px', marginBottom: '8px', fontWeight: '600' }}>Admin Password</label>
-              <input
-                type="password"
-                value={passwordInput}
-                onChange={e => setPasswordInput(e.target.value)}
-                placeholder="Enter admin password"
-                style={{ width: '100%', padding: '12px', background: '#334155', border: '1px solid #475569', borderRadius: '6px', color: '#fff', fontSize: '14px', boxSizing: 'border-box' }}
-              />
-            </div>
-            <button
-              type="submit"
-              style={{ width: '100%', padding: '12px', background: '#7c3aed', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '16px', fontWeight: '600', cursor: 'pointer' }}
-            >
-              Login
-            </button>
-          </form>
-
-          <p style={{ color: '#64748b', fontSize: '12px', marginTop: '20px', textAlign: 'center' }}>
-            Only admins can access this dashboard. Unauthorized access is logged.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // ADMIN DASHBOARD
   return (
     <div style={{ background: '#0f172a', color: '#fff', minHeight: '100vh', padding: '20px', fontFamily: 'system-ui' }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
           <div>
             <h1>Admin Dashboard</h1>
-            <p style={{ color: '#94a3b8' }}>Manage submissions & payouts</p>
+            <p style={{ color: '#94a3b8', marginTop: '5px' }}>Welcome, {user?.displayName || user?.username}!</p>
           </div>
           <button onClick={handleLogout} style={{ padding: '10px 20px', background: '#ef4444', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}>
             Logout
           </button>
         </div>
 
-        <button onClick={loadData} style={{ padding: '10px 20px', background: '#7c3aed', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', marginBottom: '30px' }}>
+        <button
+          onClick={() => loadData(localStorage.getItem('token'))}
+          style={{ padding: '10px 20px', background: '#7c3aed', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', marginBottom: '30px' }}
+        >
           Refresh
         </button>
 
