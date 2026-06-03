@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
+import { Analytics } from '@vercel/analytics/react';
 
 // Import components
 import Marketplace from './components/Marketplace';
@@ -57,6 +58,7 @@ function App() {
         {page === 'dashboard' && <Dashboard />}
         {page === 'admin' && <AdminDashboard />}
       </main>
+      <Analytics />
     </div>
   );
 }
