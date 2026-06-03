@@ -110,4 +110,3 @@ app.use(cors({
 2. Verify all fields are being sent
 3. Test API directly with Postman
 
-
