@@ -15,16 +15,9 @@ function App() {
         {/* Public Routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignupForm />} />
+        <Route path="/marketplace" element={<Marketplace />} />
         
         {/* Protected Routes */}
-        <Route 
-          path="/marketplace" 
-          element={
-            <ProtectedRoute>
-              <Marketplace />
-            </ProtectedRoute>
-          } 
-        />
         
         <Route 
           path="/dashboard" 
@@ -46,10 +39,10 @@ function App() {
         />
         
         {/* Default Route */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<Navigate to="/marketplace" replace />} />
         
         {/* Catch all */}
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/marketplace" replace />} />
       </Routes>
     </Router>
   );
