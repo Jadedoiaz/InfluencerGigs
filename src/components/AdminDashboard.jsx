@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle, XCircle, DollarSign, Eye, EyeOff, TrendingUp, Users, Video } from 'lucide-react';
 
 export default function AdminDashboard() {
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('pending');
   const [selectedSubmission, setSelectedSubmission] = useState(null);
-  const [showRewardInput, setShowRewardInput] = useState(false);
   const [rewardAmount, setRewardAmount] = useState('');
   const [stats, setStats] = useState({
     pending: 0,
@@ -15,7 +13,6 @@ export default function AdminDashboard() {
     totalEarnings: 0
   });
 
-  // Fetch submissions on mount
   useEffect(() => {
     fetchSubmissions();
   }, []);
@@ -23,12 +20,9 @@ export default function AdminDashboard() {
   const fetchSubmissions = async () => {
     try {
       setLoading(true);
-      const response = await fetch('https://influencer-gig-api-production.up.railway.app/api/submissions', {
-        headers: { 'Content-Type': 'application/json' }
-      });
+      const response = await fetch('https://influencer-gig-api-production.up.railway.app/api/submissions');
       const data = await response.json();
       
-      // Calculate stats
       const pending = data.filter(s => s.Status === 'Pending Review').length;
       const approved = data.filter(s => s.Status === 'Approved').length;
       const rejected = data.filter(s => s.Status === 'Rejected').length;
@@ -83,7 +77,6 @@ export default function AdminDashboard() {
     if (!selectedSubmission) return;
 
     try {
-      // Update submission status to Rejected
       const response = await fetch(
         `https://influencer-gig-api-production.up.railway.app/api/submissions/${selectedSubmission.id}`,
         {
@@ -111,229 +104,301 @@ export default function AdminDashboard() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800">
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(to br, #0f172a, #1e1b4b)', color: '#fff', padding: '20px' }}>
       {/* Header */}
-      <div className="sticky top-0 z-50 border-b border-slate-700 bg-slate-900/80 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-white">Admin Dashboard</h1>
-            <p className="text-slate-400 text-sm">Manage submissions & creator payouts</p>
-          </div>
+      <div style={{ borderBottom: '1px solid #334155', paddingBottom: '20px', marginBottom: '30px' }}>
+        <h1 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '5px' }}>Admin Dashboard</h1>
+        <p style={{ color: '#94a3b8', fontSize: '14px' }}>Manage submissions & creator payouts</p>
+        <button
+          onClick={fetchSubmissions}
+          style={{
+            marginTop: '15px',
+            padding: '10px 20px',
+            background: '#7c3aed',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '14px'
+          }}
+        >
+          🔄 Refresh
+        </button>
+      </div>
+
+      {/* Stats */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '30px' }}>
+        <div style={{ background: 'rgba(37, 99, 235, 0.1)', border: '1px solid rgba(59, 130, 246, 0.3)', borderRadius: '8px', padding: '20px' }}>
+          <p style={{ color: '#93c5fd', fontSize: '12px', marginBottom: '10px' }}>Pending Review</p>
+          <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#dbeafe' }}>{stats.pending}</p>
+        </div>
+
+        <div style={{ background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(74, 222, 128, 0.3)', borderRadius: '8px', padding: '20px' }}>
+          <p style={{ color: '#86efac', fontSize: '12px', marginBottom: '10px' }}>Approved</p>
+          <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#dcfce7' }}>{stats.approved}</p>
+        </div>
+
+        <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(248, 113, 113, 0.3)', borderRadius: '8px', padding: '20px' }}>
+          <p style={{ color: '#fca5a5', fontSize: '12px', marginBottom: '10px' }}>Rejected</p>
+          <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#fee2e2' }}>{stats.rejected}</p>
+        </div>
+
+        <div style={{ background: 'rgba(168, 85, 247, 0.1)', border: '1px solid rgba(196, 181, 253, 0.3)', borderRadius: '8px', padding: '20px' }}>
+          <p style={{ color: '#d8b4fe', fontSize: '12px', marginBottom: '10px' }}>Total Earnings</p>
+          <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#ede9fe' }}>${stats.totalEarnings.toFixed(2)}</p>
+        </div>
+      </div>
+
+      {/* Filter Tabs */}
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', borderBottom: '1px solid #334155', paddingBottom: '16px' }}>
+        {['pending', 'approved', 'rejected'].map(tab => (
           <button
-            onClick={fetchSubmissions}
-            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition"
+            key={tab}
+            onClick={() => setFilter(tab)}
+            style={{
+              padding: '8px 16px',
+              background: filter === tab ? '#7c3aed' : 'transparent',
+              color: filter === tab ? '#fff' : '#cbd5e1',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '500'
+            }}
           >
-            🔄 Refresh
+            {tab.charAt(0).toUpperCase() + tab.slice(1)}
           </button>
-        </div>
+        ))}
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-gradient-to-br from-blue-600/20 to-blue-900/20 border border-blue-500/30 rounded-lg p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-blue-300 text-sm font-medium">Pending Review</p>
-                <p className="text-3xl font-bold text-blue-100">{stats.pending}</p>
+      {/* Submissions Grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '20px', marginBottom: '30px' }}>
+        {filteredSubmissions.map(submission => (
+          <div
+            key={submission.id}
+            style={{
+              background: 'rgba(71, 85, 105, 0.2)',
+              border: '1px solid #475569',
+              borderRadius: '8px',
+              overflow: 'hidden',
+              cursor: 'pointer',
+              transition: 'all 0.3s'
+            }}
+            onClick={() => setSelectedSubmission(submission)}
+          >
+            <div style={{ aspectRatio: '16/9', background: '#1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+              <span style={{ fontSize: '32px' }}>🎬</span>
+            </div>
+
+            <div style={{ padding: '16px' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px', color: '#e2e8f0' }}>
+                {submission['Submission ID']}
+              </h3>
+
+              <div style={{ marginBottom: '16px' }}>
+                <p style={{ fontSize: '13px', color: '#cbd5e1', marginBottom: '4px' }}>
+                  <span style={{ color: '#94a3b8' }}>Reward:</span> ${submission['Reward Amount']?.toFixed(2) || 'TBD'}
+                </p>
+                <p style={{ fontSize: '13px', color: '#cbd5e1' }}>
+                  <span style={{ color: '#94a3b8' }}>Status:</span>{' '}
+                  <span style={{
+                    display: 'inline-block',
+                    padding: '2px 8px',
+                    borderRadius: '4px',
+                    fontSize: '11px',
+                    fontWeight: '500',
+                    background: submission.Status === 'Pending Review' ? 'rgba(202, 138, 4, 0.2)' :
+                              submission.Status === 'Approved' ? 'rgba(34, 197, 94, 0.2)' :
+                              'rgba(239, 68, 68, 0.2)',
+                    color: submission.Status === 'Pending Review' ? '#fcd34d' :
+                          submission.Status === 'Approved' ? '#86efac' :
+                          '#fca5a5'
+                  }}>
+                    {submission.Status}
+                  </span>
+                </p>
               </div>
-              <Video className="w-10 h-10 text-blue-400 opacity-50" />
+
+              <button
+                onClick={e => {
+                  e.stopPropagation();
+                  setSelectedSubmission(submission);
+                }}
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  background: 'rgba(124, 58, 237, 0.2)',
+                  color: '#c4b5fd',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontSize: '13px',
+                  fontWeight: '500',
+                  cursor: 'pointer'
+                }}
+              >
+                {submission.Status === 'Pending Review' ? '⚡ Review' : '👁️ View'}
+              </button>
             </div>
           </div>
+        ))}
+      </div>
 
-          <div className="bg-gradient-to-br from-green-600/20 to-green-900/20 border border-green-500/30 rounded-lg p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-green-300 text-sm font-medium">Approved</p>
-                <p className="text-3xl font-bold text-green-100">{stats.approved}</p>
-              </div>
-              <CheckCircle className="w-10 h-10 text-green-400 opacity-50" />
+      {/* Detail Modal */}
+      {selectedSubmission && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0, 0, 0, 0.7)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '16px',
+          zIndex: 50
+        }}>
+          <div style={{
+            background: '#1e293b',
+            borderRadius: '8px',
+            maxWidth: '600px',
+            width: '100%',
+            maxHeight: '90vh',
+            overflow: 'auto',
+            border: '1px solid #334155'
+          }}>
+            {/* Modal Header */}
+            <div style={{
+              borderBottom: '1px solid #334155',
+              padding: '20px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              position: 'sticky',
+              top: 0,
+              background: 'rgba(30, 41, 59, 0.9)'
+            }}>
+              <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#fff' }}>Submission Details</h2>
+              <button
+                onClick={() => setSelectedSubmission(null)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#94a3b8',
+                  fontSize: '24px',
+                  cursor: 'pointer'
+                }}
+              >
+                ✕
+              </button>
             </div>
-          </div>
 
-          <div className="bg-gradient-to-br from-red-600/20 to-red-900/20 border border-red-500/30 rounded-lg p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-red-300 text-sm font-medium">Rejected</p>
-                <p className="text-3xl font-bold text-red-100">{stats.rejected}</p>
-              </div>
-              <XCircle className="w-10 h-10 text-red-400 opacity-50" />
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-purple-600/20 to-purple-900/20 border border-purple-500/30 rounded-lg p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-purple-300 text-sm font-medium">Total Earnings</p>
-                <p className="text-3xl font-bold text-purple-100">${stats.totalEarnings.toFixed(2)}</p>
-              </div>
-              <DollarSign className="w-10 h-10 text-purple-400 opacity-50" />
-            </div>
-          </div>
-        </div>
-
-        {/* Filter Tabs */}
-        <div className="flex gap-2 mb-6 border-b border-slate-700 pb-4">
-          {['pending', 'approved', 'rejected'].map(tab => (
-            <button
-              key={tab}
-              onClick={() => setFilter(tab)}
-              className={`px-4 py-2 rounded-lg font-medium transition ${
-                filter === tab
-                  ? 'bg-purple-600 text-white'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
-        </div>
-
-        {/* Submissions Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredSubmissions.map(submission => (
-            <div
-              key={submission.id}
-              className="group bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden hover:border-purple-500/50 transition cursor-pointer"
-              onClick={() => setSelectedSubmission(submission)}
-            >
-              {/* Video Thumbnail */}
-              <div className="w-full aspect-video bg-slate-900 flex items-center justify-center relative overflow-hidden">
-                <Video className="w-12 h-12 text-slate-500" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent group-hover:from-purple-900/30 transition" />
+            {/* Modal Content */}
+            <div style={{ padding: '20px', color: '#cbd5e1' }}>
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#cbd5e1', marginBottom: '8px' }}>Video URL</label>
+                <a
+                  href={selectedSubmission['Video URL']}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: '#a78bfa', wordBreak: 'break-all' }}
+                >
+                  🎬 {selectedSubmission['Video URL']}
+                </a>
               </div>
 
-              {/* Content */}
-              <div className="p-4">
-                <h3 className="text-lg font-semibold text-white mb-2 truncate">
-                  {submission['Submission ID']}
-                </h3>
-                
-                <div className="space-y-2 mb-4">
-                  <p className="text-sm text-slate-300">
-                    <span className="text-slate-500">Reward:</span> ${submission['Reward Amount']?.toFixed(2) || 'TBD'}
-                  </p>
-                  <p className="text-sm text-slate-300">
-                    <span className="text-slate-500">Status:</span>{' '}
-                    <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${
-                      submission.Status === 'Pending Review' ? 'bg-yellow-900/50 text-yellow-200' :
-                      submission.Status === 'Approved' ? 'bg-green-900/50 text-green-200' :
-                      'bg-red-900/50 text-red-200'
-                    }`}>
-                      {submission.Status}
-                    </span>
-                  </p>
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#cbd5e1', marginBottom: '8px' }}>Submission ID</label>
+                <p style={{ fontFamily: 'monospace', color: '#fff' }}>{selectedSubmission['Submission ID']}</p>
+              </div>
+
+              {selectedSubmission.Caption && (
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#cbd5e1', marginBottom: '8px' }}>Caption</label>
+                  <p style={{ color: '#cbd5e1' }}>{selectedSubmission.Caption}</p>
                 </div>
+              )}
 
-                <button
-                  onClick={e => {
-                    e.stopPropagation();
-                    setSelectedSubmission(submission);
-                  }}
-                  className="w-full px-3 py-2 bg-purple-600/20 hover:bg-purple-600/40 text-purple-200 rounded text-sm font-medium transition"
-                >
-                  {submission.Status === 'Pending Review' ? '⚡ Review' : '👁️ View'}
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Detail Modal */}
-        {selectedSubmission && (
-          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-slate-700">
-              {/* Modal Header */}
-              <div className="sticky top-0 border-b border-slate-700 bg-slate-800/90 p-6 flex justify-between items-center">
-                <h2 className="text-xl font-bold text-white">Submission Details</h2>
-                <button
-                  onClick={() => setSelectedSubmission(null)}
-                  className="text-slate-400 hover:text-white text-2xl"
-                >
-                  ✕
-                </button>
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#cbd5e1', marginBottom: '8px' }}>Status</label>
+                <span style={{
+                  display: 'inline-block',
+                  padding: '6px 12px',
+                  borderRadius: '6px',
+                  fontSize: '13px',
+                  fontWeight: '500',
+                  background: selectedSubmission.Status === 'Pending Review' ? 'rgba(202, 138, 4, 0.2)' :
+                            selectedSubmission.Status === 'Approved' ? 'rgba(34, 197, 94, 0.2)' :
+                            'rgba(239, 68, 68, 0.2)',
+                  color: selectedSubmission.Status === 'Pending Review' ? '#fcd34d' :
+                        selectedSubmission.Status === 'Approved' ? '#86efac' :
+                        '#fca5a5'
+                }}>
+                  {selectedSubmission.Status}
+                </span>
               </div>
 
-              {/* Modal Content */}
-              <div className="p-6 space-y-6">
-                {/* Video URL */}
-                <div>
-                  <label className="block text-sm font-semibold text-slate-300 mb-2">Video URL</label>
-                  <a
-                    href={selectedSubmission['Video URL']}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-purple-400 hover:text-purple-300 break-all"
+              {selectedSubmission.Status === 'Pending Review' && (
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#cbd5e1', marginBottom: '8px' }}>Reward Amount ($)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={rewardAmount}
+                    onChange={e => setRewardAmount(e.target.value)}
+                    placeholder="e.g., 25.00"
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px',
+                      background: '#334155',
+                      border: '1px solid #475569',
+                      borderRadius: '6px',
+                      color: '#fff',
+                      fontSize: '14px'
+                    }}
+                  />
+                </div>
+              )}
+
+              {selectedSubmission.Status === 'Pending Review' && (
+                <div style={{ display: 'flex', gap: '12px', paddingTop: '20px' }}>
+                  <button
+                    onClick={handleApprove}
+                    disabled={!rewardAmount}
+                    style={{
+                      flex: 1,
+                      padding: '12px',
+                      background: rewardAmount ? '#22c55e' : '#6b7280',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontWeight: '600',
+                      cursor: rewardAmount ? 'pointer' : 'not-allowed',
+                      fontSize: '14px'
+                    }}
                   >
-                    🎬 {selectedSubmission['Video URL']}
-                  </a>
+                    ✓ Approve & Pay
+                  </button>
+                  <button
+                    onClick={handleReject}
+                    style={{
+                      flex: 1,
+                      padding: '12px',
+                      background: '#ef4444',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      fontSize: '14px'
+                    }}
+                  >
+                    ✕ Reject
+                  </button>
                 </div>
-
-                {/* Submission ID */}
-                <div>
-                  <label className="block text-sm font-semibold text-slate-300 mb-2">Submission ID</label>
-                  <p className="text-white font-mono">{selectedSubmission['Submission ID']}</p>
-                </div>
-
-                {/* Caption */}
-                {selectedSubmission.Caption && (
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-300 mb-2">Caption</label>
-                    <p className="text-slate-300">{selectedSubmission.Caption}</p>
-                  </div>
-                )}
-
-                {/* Status */}
-                <div>
-                  <label className="block text-sm font-semibold text-slate-300 mb-2">Status</label>
-                  <p className={`inline-block px-3 py-1 rounded font-medium ${
-                    selectedSubmission.Status === 'Pending Review' ? 'bg-yellow-900/50 text-yellow-200' :
-                    selectedSubmission.Status === 'Approved' ? 'bg-green-900/50 text-green-200' :
-                    'bg-red-900/50 text-red-200'
-                  }`}>
-                    {selectedSubmission.Status}
-                  </p>
-                </div>
-
-                {/* Reward Amount */}
-                {selectedSubmission.Status === 'Pending Review' && (
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-300 mb-2">Reward Amount ($)</label>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={rewardAmount}
-                      onChange={e => setRewardAmount(e.target.value)}
-                      placeholder="e.g., 25.00"
-                      className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded text-white placeholder-slate-500 focus:border-purple-500 focus:outline-none"
-                    />
-                  </div>
-                )}
-
-                {/* Action Buttons */}
-                {selectedSubmission.Status === 'Pending Review' && (
-                  <div className="flex gap-3 pt-4">
-                    <button
-                      onClick={handleApprove}
-                      disabled={!rewardAmount}
-                      className="flex-1 px-4 py-3 bg-green-600 hover:bg-green-700 disabled:bg-slate-600 text-white rounded-lg font-semibold transition flex items-center justify-center gap-2"
-                    >
-                      <CheckCircle className="w-5 h-5" /> Approve & Pay
-                    </button>
-                    <button
-                      onClick={handleReject}
-                      className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition flex items-center justify-center gap-2"
-                    >
-                      <XCircle className="w-5 h-5" /> Reject
-                    </button>
-                  </div>
-                )}
-              </div>
+              )}
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
