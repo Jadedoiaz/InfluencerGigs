@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 export default function SignupForm() {
   const [step, setStep] = useState(1);
@@ -13,7 +12,6 @@ export default function SignupForm() {
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
