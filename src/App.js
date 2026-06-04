@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './components/Login';
 import SignupForm from './components/SignupForm';
+import Verify from './components/Verify';
 import ProtectedRoute from './components/ProtectedRoute';
 import Marketplace from './components/Marketplace';
 import Dashboard from './components/Dashboard';
@@ -15,6 +16,7 @@ function App() {
         {/* Public Routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignupForm />} />
+        <Route path="/verify" element={<Verify />} />
         <Route path="/marketplace" element={<Marketplace />} />
         
         {/* Protected Routes */}
@@ -39,10 +41,10 @@ function App() {
         />
         
         {/* Default Route */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<Navigate to="/marketplace" replace />} />
         
         {/* Catch all */}
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/marketplace" replace />} />
       </Routes>
     </Router>
   );
