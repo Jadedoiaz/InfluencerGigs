@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function Marketplace() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const navigate = useNavigate();
+  const token = localStorage.getItem('token');
 
   useEffect(() => {
     fetchProducts();
@@ -34,6 +37,14 @@ export default function Marketplace() {
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleCreateContent = (product) => {
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+    navigate('/dashboard', { state: { selectedProduct: product } });
   };
 
   if (loading) {
@@ -106,26 +117,45 @@ export default function Marketplace() {
                   {product.Category && (
                     <p style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '10px' }}>{product.Category}</p>
                   )}
-                  {product['Affiliate Link'] && (
-                    <a
-                      href={product['Affiliate Link']}
-                      target="_blank"
-                      rel="noopener noreferrer"
+
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    {product['Affiliate Link'] && (
+                      <a
+                        href={product['Affiliate Link']}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          flex: 1,
+                          padding: '8px',
+                          background: '#7c3aed',
+                          color: '#fff',
+                          textDecoration: 'none',
+                          borderRadius: '6px',
+                          fontSize: '13px',
+                          fontWeight: '600',
+                          textAlign: 'center'
+                        }}
+                      >
+                        View Product
+                      </a>
+                    )}
+                    <button
+                      onClick={() => handleCreateContent(product)}
                       style={{
-                        display: 'block',
+                        flex: 1,
                         padding: '8px',
-                        background: '#7c3aed',
+                        background: '#10b981',
                         color: '#fff',
-                        textDecoration: 'none',
+                        border: 'none',
                         borderRadius: '6px',
                         fontSize: '13px',
                         fontWeight: '600',
-                        textAlign: 'center'
+                        cursor: 'pointer'
                       }}
                     >
-                      View Product
-                    </a>
-                  )}
+                      Create Content
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
