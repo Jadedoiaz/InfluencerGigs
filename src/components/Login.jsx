@@ -1,106 +1,134 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+const API = 'https://influencer-gig-api-production.up.railway.app';
+
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError('');
-    setIsLoading(true);
+    if (!email || !password) {
+      setError('Please enter both email and password');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
 
     try {
-      const response = await fetch('https://influencer-gig-api-production.up.railway.app/api/auth/login', {
+      const res = await fetch(API + '/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       });
 
-      const data = await response.json();
+      const data = await res.json();
 
-      if (!response.ok) {
-        setError(data.error || 'Login failed');
-        return;
-      }
-
-      // Store token and user info
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-
-      // Redirect based on role
-      if (data.user.isAdmin) {
-        navigate('/admin');
+      if (res.ok) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        navigate(data.user.isAdmin ? '/admin' : '/dashboard');
       } else {
-        navigate('/dashboard');
+        setError(data.error || 'Login failed');
       }
     } catch (err) {
-      setError('Connection error. Please try again.');
-      console.error(err);
+      setError('Network error. Please try again.');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div style={{ background: '#0f172a', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', fontFamily: 'system-ui' }}>
-      <div style={{ background: '#1e293b', borderRadius: '8px', padding: '40px', maxWidth: '400px', width: '100%', border: '1px solid #475569' }}>
-        <h1 style={{ color: '#fff', marginBottom: '10px' }}>🎬 InfluencerGig Login</h1>
-        <p style={{ color: '#cbd5e1', marginBottom: '30px' }}>Sign in to your account</p>
+    <div style={{ background: '#f9fafb', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', fontFamily: 'system-ui' }}>
+      <div style={{ background: '#fff', borderRadius: '10px', border: '1px solid #e5e7eb', padding: '40px', maxWidth: '400px', width: '100%' }}>
+        <h2 style={{ fontSize: '22px', fontWeight: 'bold', color: '#111827', marginBottom: '8px', textAlign: 'center' }}>
+          Welcome Back
+        </h2>
+        <p style={{ color: '#6b7280', fontSize: '14px', textAlign: 'center', marginBottom: '24px' }}>
+          Login to your InfluencerGig account
+        </p>
 
         {error && (
-          <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(248, 113, 113, 0.3)', borderRadius: '6px', padding: '12px', marginBottom: '20px', color: '#fca5a5' }}>
+          <div style={{
+            padding: '12px 16px',
+            borderRadius: '8px',
+            marginBottom: '16px',
+            background: '#fef2f2',
+            color: '#991b1b',
+            border: '1px solid #fecaca',
+            fontSize: '13px'
+          }}>
             {error}
           </div>
         )}
 
-        <form onSubmit={handleLogin}>
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', color: '#cbd5e1', fontSize: '14px', marginBottom: '8px', fontWeight: '600' }}>Email</label>
+        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>
+              Email
+            </label>
             <input
               type="email"
               value={email}
-              onChange={e => setEmail(e.target.value)}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              required
-              style={{ width: '100%', padding: '12px', background: '#334155', border: '1px solid #475569', borderRadius: '6px', color: '#fff', fontSize: '14px', boxSizing: 'border-box' }}
+              style={{ width: '100%', padding: '10px 14px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '14px', boxSizing: 'border-box' }}
             />
           </div>
 
-          <div style={{ marginBottom: '30px' }}>
-            <label style={{ display: 'block', color: '#cbd5e1', fontSize: '14px', marginBottom: '8px', fontWeight: '600' }}>Password</label>
+          <div>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>
+              Password
+            </label>
             <input
               type="password"
               value={password}
-              onChange={e => setPassword(e.target.value)}
+              onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              required
-              style={{ width: '100%', padding: '12px', background: '#334155', border: '1px solid #475569', borderRadius: '6px', color: '#fff', fontSize: '14px', boxSizing: 'border-box' }}
+              style={{ width: '100%', padding: '10px 14px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '14px', boxSizing: 'border-box' }}
             />
           </div>
 
           <button
             type="submit"
-            disabled={isLoading}
-            style={{ width: '100%', padding: '12px', background: '#7c3aed', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '16px', fontWeight: '600', cursor: isLoading ? 'not-allowed' : 'pointer', opacity: isLoading ? 0.6 : 1 }}
+            disabled={loading}
+            style={{
+              padding: '12px',
+              background: loading ? '#9ca3af' : '#7c3aed',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '6px',
+              fontSize: '14px',
+              fontWeight: '600',
+              cursor: loading ? 'not-allowed' : 'pointer'
+            }}
           >
-            {isLoading ? 'Signing in...' : 'Sign In'}
+            {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
 
-        <div style={{ marginTop: '20px', textAlign: 'center' }}>
-          <p style={{ color: '#cbd5e1', fontSize: '14px' }}>
+        <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <button
+            onClick={() => navigate('/forgot-password')}
+            style={{ background: 'none', border: 'none', color: '#7c3aed', fontSize: '13px', fontWeight: '600', cursor: 'pointer', padding: 0 }}
+          >
+            Forgot Password?
+          </button>
+          <div style={{ textAlign: 'center', fontSize: '13px', color: '#6b7280' }}>
             Don't have an account?{' '}
-            <a href="/signup" style={{ color: '#a78bfa', textDecoration: 'none', fontWeight: '600' }}>Sign up</a>
-          </p>
+            <button
+              onClick={() => navigate('/signup')}
+              style={{ background: 'none', border: 'none', color: '#7c3aed', fontWeight: '600', cursor: 'pointer', padding: 0 }}
+            >
+              Sign up
+            </button>
+          </div>
         </div>
-
-        <p style={{ color: '#64748b', fontSize: '12px', marginTop: '20px', textAlign: 'center' }}>
-          Secure login with encrypted passwords
-        </p>
       </div>
     </div>
   );
