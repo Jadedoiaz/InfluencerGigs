@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 const API = 'https://influencer-gig-api-production.up.railway.app';
 
@@ -15,11 +15,7 @@ export default function AdminDashboard() {
 
   const token = localStorage.getItem('token');
 
-  useEffect(() => {
-    fetchSubmissions();
-  }, []);
-
-  const fetchSubmissions = async () => {
+  const fetchSubmissions = useCallback(async () => {
     try {
       setLoading(true);
       const res = await fetch(API + '/api/submissions', {
@@ -32,7 +28,11 @@ export default function AdminDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+    fetchSubmissions();
+  }, [fetchSubmissions]);
 
   const handleApprove = async () => {
     if (!rewardAmount || parseFloat(rewardAmount) <= 0) {
