@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const CATEGORIES = ['All', 'Beauty', 'Wellness', 'Lifestyle', 'Tech', 'Fashion', 'Home', 'Health', 'Fitness', 'Pets'];
+const CATEGORIES = ['All', 'Beauty', 'Wellness', 'Lifestyle', 'Tech', 'Fashion', 'Home', 'Health', 'Fitness', 'Pets', 'Gaming', 'Travel'];
 
 export default function Marketplace() {
   const [products, setProducts] = useState([]);
