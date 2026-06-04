@@ -15,35 +15,13 @@ function App() {
     <Router>
       <Header />
       <Routes>
-        {/* Public Routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignupForm />} />
         <Route path="/verify" element={<Verify />} />
         <Route path="/marketplace" element={<Marketplace />} />
-        {/* Protected Routes */}
-        <Route 
-          path="/dashboard" 
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          } 
-        />
-        
-        {/* Admin Only Route */}
-        <Route 
-          path="/admin" 
-          element={
-            <ProtectedRoute requireAdmin={true}>
-              <AdminDashboard />
-            </ProtectedRoute>
-          } 
-        />
-        
-        {/* Default Route */}
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/admin" element={<ProtectedRoute requireAdmin={true}><AdminDashboard /></ProtectedRoute>} />
         <Route path="/" element={<Navigate to="/marketplace" replace />} />
-        
-        {/* Catch all */}
         <Route path="*" element={<Navigate to="/marketplace" replace />} />
       </Routes>
     </Router>
