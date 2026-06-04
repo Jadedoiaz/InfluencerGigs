@@ -15,9 +15,9 @@ export default function AdminDashboard() {
 
   const token = localStorage.getItem('token');
 
-  const fetchSubmissions = useCallback(async () => {
+  const fetchSubmissions = useCallback(async (showLoading = true) => {
     try {
-      setLoading(true);
+      if (showLoading) setLoading(true);
       const res = await fetch(API + '/api/submissions', {
         headers: { 'Authorization': 'Bearer ' + token }
       });
@@ -26,7 +26,7 @@ export default function AdminDashboard() {
     } catch (err) {
       console.error('Error fetching submissions:', err);
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   }, [token]);
 
@@ -62,7 +62,7 @@ export default function AdminDashboard() {
         setMessage({ type: 'success', text: `✅ Submission approved! Creator will receive $${rewardAmount}` });
         setApproveModal(null);
         setRewardAmount('');
-        fetchSubmissions();
+        fetchSubmissions(false); // Refresh silently in background
       } else {
         setMessage({ type: 'error', text: data.error || 'Approval failed' });
       }
@@ -96,7 +96,7 @@ export default function AdminDashboard() {
         setMessage({ type: 'success', text: '✅ Submission rejected' });
         setRejectModal(null);
         setRejectionReason('');
-        fetchSubmissions();
+        fetchSubmissions(false); // Refresh silently in background
       } else {
         setMessage({ type: 'error', text: data.error || 'Rejection failed' });
       }
