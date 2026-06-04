@@ -20,7 +20,6 @@ function App() {
         <Route path="/signup" element={<SignupForm />} />
         <Route path="/verify" element={<Verify />} />
         <Route path="/marketplace" element={<Marketplace />} />
-        
         {/* Protected Routes */}
         <Route 
           path="/dashboard" 
