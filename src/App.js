@@ -2,6 +2,8 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Header from './components/Header';
 import Login from './components/Login';
+import ForgotPassword from './components/ForgotPassword';
+import ResetPassword from './components/ResetPassword';
 import SignupForm from './components/SignupForm';
 import Verify from './components/Verify';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -16,6 +18,8 @@ function App() {
       <Header />
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/signup" element={<SignupForm />} />
         <Route path="/verify" element={<Verify />} />
         <Route path="/marketplace" element={<Marketplace />} />
