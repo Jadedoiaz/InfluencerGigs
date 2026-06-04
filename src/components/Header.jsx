@@ -37,12 +37,16 @@ export default function Header() {
           InfluencerGig
         </div>
 
-        <nav style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+        <nav style={{ display: 'flex', gap: '20px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <a href="https://www.influencergig.online" style={{ color: '#374151', textDecoration: 'none', fontSize: '14px', fontWeight: '500' }}>
+            Home
+          </a>
+          <a href="/marketplace" style={{ color: '#374151', textDecoration: 'none', fontSize: '14px', fontWeight: '500' }}>
+            Marketplace
+          </a>
+
           {!token ? (
             <>
-              <a href="/marketplace" style={{ color: '#374151', textDecoration: 'none', fontSize: '14px', fontWeight: '500' }}>
-                Marketplace
-              </a>
               <a href="/login" style={{ color: '#374151', textDecoration: 'none', fontSize: '14px', fontWeight: '500' }}>
                 Login
               </a>
@@ -60,9 +64,6 @@ export default function Header() {
             </>
           ) : (
             <>
-              <a href="/marketplace" style={{ color: '#374151', textDecoration: 'none', fontSize: '14px', fontWeight: '500' }}>
-                Marketplace
-              </a>
               {user && user.isAdmin ? (
                 <a href="/admin" style={{ color: '#7c3aed', textDecoration: 'none', fontSize: '14px', fontWeight: 'bold' }}>
                   Admin
