@@ -22,7 +22,6 @@ function App() {
         <Route path="/marketplace" element={<Marketplace />} />
         
         {/* Protected Routes */}
-        
         <Route 
           path="/dashboard" 
           element={
