@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Header from './components/Header';
 import Login from './components/Login';
 import SignupForm from './components/SignupForm';
 import Verify from './components/Verify';
@@ -12,6 +13,7 @@ import './App.css';
 function App() {
   return (
     <Router>
+      <Header />
       <Routes>
         {/* Public Routes */}
         <Route path="/login" element={<Login />} />
