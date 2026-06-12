@@ -205,16 +205,16 @@ export default function Marketplace() {
                           style={{
                             flex: 1,
                             padding: '8px',
-                            background: '#7c3aed',
-                            color: '#fff',
+                            background: '#FF9900',
+                            color: '#111',
                             textDecoration: 'none',
                             borderRadius: '6px',
                             fontSize: '13px',
-                            fontWeight: '600',
+                            fontWeight: '700',
                             textAlign: 'center'
                           }}
                         >
-                          View Product
+                          🛒 Buy on Amazon
                         </a>
                       )}
                       <button
