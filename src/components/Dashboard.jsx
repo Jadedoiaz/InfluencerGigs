@@ -18,7 +18,6 @@ export default function Dashboard() {
   const [briefSending, setBriefSending] = useState(false);
   const [briefSent, setBriefSent] = useState(false);
   const [stripeAccountId, setStripeAccountId] = useState('');
-  const [stripeConnectUrl, setStripeConnectUrl] = useState('');
 
   const token = localStorage.getItem('token');
 
