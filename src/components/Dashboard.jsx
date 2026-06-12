@@ -8,16 +8,51 @@ export default function Dashboard() {
   const [payouts, setPayouts] = useState([]);
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState('');
+  const [selectedProductData, setSelectedProductData] = useState(null);
   const [videoUrl, setVideoUrl] = useState('');
   const [caption, setCaption] = useState('');
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState(null);
   const [activeTab, setActiveTab] = useState('submissions');
   const [submitting, setSubmitting] = useState(false);
+  const [briefSending, setBriefSending] = useState(false);
+  const [briefSent, setBriefSent] = useState(false);
   const [stripeAccountId, setStripeAccountId] = useState('');
   const [stripeConnectUrl, setStripeConnectUrl] = useState('');
 
   const token = localStorage.getItem('token');
+
+  const handleProductSelect = (productId) => {
+    setSelectedProduct(productId);
+    setBriefSent(false);
+    const product = products.find(p => p.id === productId);
+    setSelectedProductData(product || null);
+  };
+
+  const handleSendBrief = async () => {
+    if (!selectedProduct) return;
+    setBriefSending(true);
+    try {
+      const res = await fetch(API + '/api/send-brief', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({ productId: selectedProduct })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setBriefSent(true);
+      } else {
+        setMessage({ type: 'error', text: data.error || 'Failed to send brief' });
+      }
+    } catch (err) {
+      setMessage({ type: 'error', text: 'Network error' });
+    } finally {
+      setBriefSending(false);
+    }
+  };
 
   const fetchUser = useCallback(async () => {
     try {
@@ -350,69 +385,156 @@ export default function Dashboard() {
 
         {/* Tab: Create Content */}
         {activeTab === 'create' && (
-          <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '10px', padding: '28px' }}>
-            <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#111827', marginBottom: '20px' }}>Create New Submission</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
-            <form onSubmit={handleSubmitContent} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>
-                  Product *
-                </label>
-                <select
-                  value={selectedProduct}
-                  onChange={(e) => setSelectedProduct(e.target.value)}
-                  style={{ width: '100%', padding: '10px 14px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '14px', boxSizing: 'border-box' }}
-                >
-                  <option value="">Select a product...</option>
-                  {products.map((p) => (
-                    <option key={p.id} value={p.id}>{p['Product Name']}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>
-                  Video URL *
-                </label>
-                <input
-                  type="url"
-                  value={videoUrl}
-                  onChange={(e) => setVideoUrl(e.target.value)}
-                  placeholder="https://..."
-                  style={{ width: '100%', padding: '10px 14px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '14px', boxSizing: 'border-box' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>
-                  Caption
-                </label>
-                <textarea
-                  value={caption}
-                  onChange={(e) => setCaption(e.target.value)}
-                  placeholder="Describe your video content..."
-                  rows={4}
-                  style={{ width: '100%', padding: '10px 14px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '14px', boxSizing: 'border-box' }}
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={submitting}
-                style={{
-                  padding: '12px',
-                  background: submitting ? '#9ca3af' : '#7c3aed',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  cursor: submitting ? 'not-allowed' : 'pointer'
-                }}
+            {/* Step 1: Pick Product */}
+            <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '10px', padding: '24px' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#111827', marginBottom: '16px' }}>
+                Step 1 — Choose a Product
+              </h3>
+              <select
+                value={selectedProduct}
+                onChange={(e) => handleProductSelect(e.target.value)}
+                style={{ width: '100%', padding: '10px 14px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '14px', boxSizing: 'border-box' }}
               >
-                {submitting ? 'Submitting...' : 'Submit Content'}
-              </button>
-            </form>
+                <option value="">Select a product...</option>
+                {products.map((p) => (
+                  <option key={p.id} value={p.id}>{p['Product Name']}{p['Reward Amount'] ? ` — $${p['Reward Amount'].toFixed(2)} reward` : ''}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Content Brief (shown when product selected) */}
+            {selectedProductData && (
+              <div style={{ background: '#fff', border: '2px solid #7c3aed', borderRadius: '10px', padding: '24px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '20px' }}>
+                  <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#7c3aed', margin: 0 }}>
+                    📋 Content Brief — {selectedProductData['Product Name']}
+                  </h3>
+                  <button
+                    onClick={handleSendBrief}
+                    disabled={briefSending || briefSent}
+                    style={{
+                      padding: '8px 16px',
+                      background: briefSent ? '#10b981' : briefSending ? '#9ca3af' : '#7c3aed',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontSize: '13px',
+                      fontWeight: '600',
+                      cursor: (briefSending || briefSent) ? 'not-allowed' : 'pointer'
+                    }}
+                  >
+                    {briefSent ? '✅ Brief Sent to Email' : briefSending ? 'Sending...' : '📧 Email Me This Brief'}
+                  </button>
+                </div>
+
+                {/* Reward */}
+                {selectedProductData['Reward Amount'] && (
+                  <div style={{ background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: '8px', padding: '14px', marginBottom: '16px' }}>
+                    <p style={{ fontSize: '12px', color: '#6b7280', textTransform: 'uppercase', fontWeight: '600', marginBottom: '4px' }}>Your Reward</p>
+                    <p style={{ fontSize: '22px', fontWeight: 'bold', color: '#7c3aed', margin: 0 }}>${selectedProductData['Reward Amount'].toFixed(2)}</p>
+                    <p style={{ fontSize: '12px', color: '#6b7280', margin: '4px 0 0' }}>Paid upon admin approval</p>
+                  </div>
+                )}
+
+                {/* Content Brief */}
+                {selectedProductData['Content Brief'] && (
+                  <div style={{ marginBottom: '16px' }}>
+                    <p style={{ fontSize: '12px', fontWeight: '700', color: '#374151', textTransform: 'uppercase', marginBottom: '8px' }}>📹 What To Do</p>
+                    <p style={{ fontSize: '14px', color: '#374151', lineHeight: '1.6', whiteSpace: 'pre-line', background: '#f9fafb', padding: '12px', borderRadius: '8px', margin: 0 }}>
+                      {selectedProductData['Content Brief']}
+                    </p>
+                  </div>
+                )}
+
+                {/* Key Selling Points */}
+                {selectedProductData['Key Selling Points'] && (
+                  <div style={{ marginBottom: '16px' }}>
+                    <p style={{ fontSize: '12px', fontWeight: '700', color: '#374151', textTransform: 'uppercase', marginBottom: '8px' }}>✅ Key Selling Points</p>
+                    <p style={{ fontSize: '14px', color: '#374151', lineHeight: '1.6', whiteSpace: 'pre-line', background: '#f9fafb', padding: '12px', borderRadius: '8px', margin: 0 }}>
+                      {selectedProductData['Key Selling Points']}
+                    </p>
+                  </div>
+                )}
+
+                {/* Platforms */}
+                {selectedProductData['Post Platforms'] && selectedProductData['Post Platforms'].length > 0 && (
+                  <div style={{ marginBottom: '16px' }}>
+                    <p style={{ fontSize: '12px', fontWeight: '700', color: '#374151', textTransform: 'uppercase', marginBottom: '8px' }}>📱 Where to Post</p>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                      {selectedProductData['Post Platforms'].map((p, i) => (
+                        <span key={i} style={{ padding: '4px 12px', background: '#ede9fe', color: '#7c3aed', borderRadius: '20px', fontSize: '13px', fontWeight: '600' }}>
+                          {p.name || p}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Affiliate Link */}
+                {selectedProductData['Affiliate Link'] && (
+                  <div style={{ background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: '8px', padding: '14px' }}>
+                    <p style={{ fontSize: '12px', fontWeight: '700', color: '#065f46', textTransform: 'uppercase', marginBottom: '6px' }}>🔗 Your Affiliate Link — Put This In Your Bio</p>
+                    <p style={{ fontSize: '12px', color: '#374151', wordBreak: 'break-all', margin: '0 0 6px', fontFamily: 'monospace', background: '#fff', padding: '8px', borderRadius: '4px' }}>
+                      {selectedProductData['Affiliate Link']}
+                    </p>
+                    <p style={{ fontSize: '11px', color: '#6b7280', margin: 0 }}>⚠️ Do not modify this link — it tracks purchases for your commission</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Step 2: Submit Video */}
+            <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '10px', padding: '24px' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#111827', marginBottom: '16px' }}>
+                Step 2 — Submit Your Video
+              </h3>
+              <form onSubmit={handleSubmitContent} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>
+                    Video URL * <span style={{ fontWeight: '400', color: '#6b7280' }}>(TikTok, Instagram, YouTube link)</span>
+                  </label>
+                  <input
+                    type="url"
+                    value={videoUrl}
+                    onChange={(e) => setVideoUrl(e.target.value)}
+                    placeholder="https://..."
+                    style={{ width: '100%', padding: '10px 14px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '14px', boxSizing: 'border-box' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>
+                    Caption
+                  </label>
+                  <textarea
+                    value={caption}
+                    onChange={(e) => setCaption(e.target.value)}
+                    placeholder="Paste the caption you used in your post..."
+                    rows={3}
+                    style={{ width: '100%', padding: '10px 14px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '14px', boxSizing: 'border-box' }}
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={submitting || !selectedProduct}
+                  style={{
+                    padding: '12px',
+                    background: (submitting || !selectedProduct) ? '#9ca3af' : '#7c3aed',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    cursor: (submitting || !selectedProduct) ? 'not-allowed' : 'pointer'
+                  }}
+                >
+                  {submitting ? 'Submitting...' : 'Submit Content'}
+                </button>
+              </form>
+            </div>
           </div>
         )}
       </div>
