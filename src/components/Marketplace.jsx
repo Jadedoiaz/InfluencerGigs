@@ -206,18 +206,18 @@ export default function Marketplace() {
                     )}
 
                     {/* Social proof + reward row */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', gap: '6px', minHeight: '22px' }}>
                       {product.submissionCount > 0 ? (
-                        <span style={{ fontSize: '11px', color: '#7c3aed', fontWeight: '600' }}>
+                        <span style={{ fontSize: '11px', color: '#7c3aed', fontWeight: '600', flexShrink: 0 }}>
                           🎬 {product.submissionCount} video{product.submissionCount !== 1 ? 's' : ''} submitted
                         </span>
                       ) : (
-                        <span style={{ fontSize: '11px', color: '#10b981', fontWeight: '600' }}>
+                        <span style={{ fontSize: '11px', color: '#10b981', fontWeight: '600', flexShrink: 0 }}>
                           ⭐ Be the first creator!
                         </span>
                       )}
                       {product['Reward Amount'] && (
-                        <span style={{ fontSize: '11px', fontWeight: '700', color: '#fff', background: '#7c3aed', padding: '2px 8px', borderRadius: '10px' }}>
+                        <span style={{ fontSize: '11px', fontWeight: '700', color: '#fff', background: '#7c3aed', padding: '3px 8px', borderRadius: '10px', whiteSpace: 'nowrap', flexShrink: 0 }}>
                           💰 ${product['Reward Amount'].toFixed(2)} reward
                         </span>
                       )}
