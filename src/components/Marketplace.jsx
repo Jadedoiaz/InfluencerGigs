@@ -142,6 +142,15 @@ export default function Marketplace() {
             </button>
           </div>
         ) : (
+          <>
+            {/* Legend */}
+            <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '16px', padding: '12px 16px', background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: '8px' }}>
+              <span style={{ fontSize: '12px', fontWeight: '700', color: '#7c3aed' }}>Key:</span>
+              <span style={{ fontSize: '12px', color: '#374151' }}>💰 <strong>Creator Reward</strong> — what you earn when your video is approved</span>
+              <span style={{ fontSize: '12px', color: '#374151' }}>🎬 <strong>Videos submitted</strong> — how many creators have made content for this product</span>
+              <span style={{ fontSize: '12px', color: '#374151' }}>⭐ <strong>Be the first</strong> — no videos yet, stand out early!</span>
+            </div>
+
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' }}>
             {filteredProducts.map((product) => {
               const categoryName = product.Category
@@ -208,8 +217,8 @@ export default function Marketplace() {
                         </span>
                       )}
                       {product['Reward Amount'] && (
-                        <span style={{ fontSize: '12px', fontWeight: '700', color: '#fff', background: '#7c3aed', padding: '2px 8px', borderRadius: '10px' }}>
-                          💰 ${product['Reward Amount'].toFixed(2)}
+                        <span style={{ fontSize: '11px', fontWeight: '700', color: '#fff', background: '#7c3aed', padding: '2px 8px', borderRadius: '10px' }}>
+                          💰 ${product['Reward Amount'].toFixed(2)} reward
                         </span>
                       )}
                     </div>
@@ -257,6 +266,7 @@ export default function Marketplace() {
               );
             })}
           </div>
+          </>
         )}
       </div>
 
