@@ -307,13 +307,31 @@ export default function Dashboard() {
                 {submissions.map((sub) => (
                   <div key={sub.id} style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '10px', padding: '16px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', gap: '16px' }}>
-                      <div style={{ flex: 1 }}>
-                        <p style={{ fontSize: '14px', fontWeight: '600', color: '#111827', marginBottom: '4px' }}>
-                          {sub['Product Name'] || 'Unknown Product'}
-                        </p>
-                        {sub.Caption && <p style={{ fontSize: '13px', color: '#6b7280', marginBottom: '8px' }}>{sub.Caption}</p>}
+                      <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', flex: 1 }}>
+                        {sub['Product Image'] ? (
+                          <img
+                            src={sub['Product Image']}
+                            alt={sub['Product Name']}
+                            style={{ width: '52px', height: '52px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #e5e7eb', flexShrink: 0 }}
+                          />
+                        ) : (
+                          <div style={{ width: '52px', height: '52px', background: '#f3f4f6', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '20px' }}>
+                            📦
+                          </div>
+                        )}
+                        <div>
+                          <p style={{ fontSize: '14px', fontWeight: '600', color: '#111827', marginBottom: '4px' }}>
+                            {sub['Product Name'] || 'Unknown Product'}
+                          </p>
+                          {sub.Caption && <p style={{ fontSize: '13px', color: '#6b7280', marginBottom: '4px' }}>{sub.Caption}</p>}
+                          {sub['Video URL'] && (
+                            <a href={sub['Video URL']} target="_blank" rel="noopener noreferrer" style={{ fontSize: '12px', color: '#7c3aed' }}>
+                              View Video →
+                            </a>
+                          )}
+                        </div>
                       </div>
-                      <div style={{ textAlign: 'right' }}>
+                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
                         <span style={{
                           display: 'inline-block',
                           padding: '4px 12px',
@@ -327,7 +345,12 @@ export default function Dashboard() {
                         </span>
                         {sub.Status === 'Approved' && sub['Reward Amount'] && (
                           <p style={{ fontSize: '14px', fontWeight: '600', color: '#10b981', marginTop: '8px' }}>
-                            💰 ${sub['Reward Amount'].toFixed(2)}
+                            💰 ${sub['Reward Amount'].toFixed(2)} earned
+                          </p>
+                        )}
+                        {sub['Admin Notes'] && (
+                          <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '6px', maxWidth: '180px' }}>
+                            📝 {sub['Admin Notes']}
                           </p>
                         )}
                       </div>
