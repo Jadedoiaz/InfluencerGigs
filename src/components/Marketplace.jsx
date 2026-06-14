@@ -146,7 +146,7 @@ export default function Marketplace() {
             {/* Legend */}
             <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '16px', padding: '12px 16px', background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: '8px' }}>
               <span style={{ fontSize: '12px', fontWeight: '700', color: '#7c3aed' }}>Key:</span>
-              <span style={{ fontSize: '12px', color: '#374151' }}>💰 <strong>Creator Reward</strong> — what you earn when your video is approved</span>
+              <span style={{ fontSize: '12px', color: '#374151' }}>💰 <strong>Creator Reward</strong> — bonus you earn when your video is approved</span>
               <span style={{ fontSize: '12px', color: '#374151' }}>🎬 <strong>Videos submitted</strong> — how many creators have made content for this product</span>
               <span style={{ fontSize: '12px', color: '#374151' }}>⭐ <strong>Be the first</strong> — no videos yet, stand out early!</span>
             </div>
