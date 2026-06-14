@@ -12,8 +12,34 @@ export default function AdminDashboard() {
   const [processing, setProcessing] = useState(false);
   const [message, setMessage] = useState(null);
   const [activeFilter, setActiveFilter] = useState('All');
+  const [emailSending, setEmailSending] = useState(false);
 
   const token = localStorage.getItem('token');
+
+  const handleSendWeeklyEmail = async () => {
+    if (!window.confirm('Send weekly product email to all verified creators?')) return;
+    setEmailSending(true);
+    setMessage(null);
+    try {
+      const res = await fetch(API + '/api/admin/send-weekly-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setMessage({ type: 'success', text: `✅ Weekly email sent to ${data.sent} creator${data.sent !== 1 ? 's' : ''}!${data.failed > 0 ? ` (${data.failed} failed)` : ''}` });
+      } else {
+        setMessage({ type: 'error', text: data.error || 'Failed to send email' });
+      }
+    } catch (err) {
+      setMessage({ type: 'error', text: 'Network error' });
+    } finally {
+      setEmailSending(false);
+    }
+  };
 
   const fetchSubmissions = useCallback(async (showLoading = true) => {
     try {
@@ -142,11 +168,32 @@ export default function AdminDashboard() {
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '32px 20px' }}>
 
         {/* Header */}
-        <div style={{ marginBottom: '32px' }}>
-          <h1 style={{ fontSize: '26px', fontWeight: 'bold', color: '#111827', marginBottom: '4px' }}>
-            Admin Dashboard
-          </h1>
-          <p style={{ color: '#6b7280', fontSize: '14px' }}>Review and approve creator submissions</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px', marginBottom: '32px' }}>
+          <div>
+            <h1 style={{ fontSize: '26px', fontWeight: 'bold', color: '#111827', marginBottom: '4px' }}>
+              Admin Dashboard
+            </h1>
+            <p style={{ color: '#6b7280', fontSize: '14px' }}>Review and approve creator submissions</p>
+          </div>
+          <button
+            onClick={handleSendWeeklyEmail}
+            disabled={emailSending}
+            style={{
+              padding: '10px 20px',
+              background: emailSending ? '#9ca3af' : '#7c3aed',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '13px',
+              fontWeight: '600',
+              cursor: emailSending ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            {emailSending ? '📧 Sending...' : '📧 Send Weekly Email'}
+          </button>
         </div>
 
         {/* Messages */}

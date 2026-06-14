@@ -190,11 +190,29 @@ export default function Marketplace() {
                         fontSize: '11px',
                         color: '#6b7280',
                         fontWeight: '500',
-                        marginBottom: '10px'
+                        marginBottom: '8px'
                       }}>
                         {categoryName}
                       </span>
                     )}
+
+                    {/* Social proof + reward row */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                      {product.submissionCount > 0 ? (
+                        <span style={{ fontSize: '11px', color: '#7c3aed', fontWeight: '600' }}>
+                          🎬 {product.submissionCount} video{product.submissionCount !== 1 ? 's' : ''} submitted
+                        </span>
+                      ) : (
+                        <span style={{ fontSize: '11px', color: '#10b981', fontWeight: '600' }}>
+                          ⭐ Be the first creator!
+                        </span>
+                      )}
+                      {product['Reward Amount'] && (
+                        <span style={{ fontSize: '12px', fontWeight: '700', color: '#fff', background: '#7c3aed', padding: '2px 8px', borderRadius: '10px' }}>
+                          💰 ${product['Reward Amount'].toFixed(2)}
+                        </span>
+                      )}
+                    </div>
 
                     <div style={{ display: 'flex', gap: '8px' }}>
                       {product['Affiliate Link'] && (
